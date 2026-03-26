@@ -1,0 +1,15 @@
+SALES_DATA = [
+    {"month": "January",  "product": "Web Scraper",      "revenue": 1200, "units": 3},
+    {"month": "January",  "product": "PDF Extractor",    "revenue": 800,  "units": 2},
+    {"month": "January",  "product": "Telegram Bot",     "revenue": 500,  "units": 1},
+    {"month": "February", "product": "Web Scraper",      "revenue": 1800, "units": 4},
+    {"month": "February", "product": "API Integration",  "revenue": 2200, "units": 2},
+    {"month": "February", "product": "PDF Extractor",    "revenue": 400,  "units": 1},
+    {"month": "March",    "product": "Web Scraper",      "revenue": 900,  "units": 2},
+    {"month": "March",    "product": "API Integration",  "revenue": 3100, "units": 3},
+    {"month": "March",    "product": "Telegram Bot",     "revenue": 1500, "units": 3},
+    {"month": "March",    "product": "PDF Extractor",    "revenue": 1200, "units": 3},
+    {"month": "April",    "product": "API Integration",  "revenue": 2800, "units": 3},
+    {"month": "April",    "product": "Web Scraper",      "revenue": 600,  "units": 1},
+    {"month": "April",    "product": "Telegram Bot",     "revenue": 2000, "units": 4},
+]
