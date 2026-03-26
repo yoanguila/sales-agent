@@ -11,6 +11,7 @@ data and formulates answers from actual results.
 - Agent selects the right function automatically based on the question
 - Chains multiple function calls when needed to enrich the answer
 - Returns structured data from real sources, never hallucinated numbers
+- Maintains conversation history across multiple turns
 - Easily extensible: add new functions and the agent picks them automatically
 
 ## Example interaction

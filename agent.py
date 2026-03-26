@@ -72,19 +72,8 @@ FUNCTION_MAP = {
     "get_total_revenue": get_total_revenue,
 }
 
-def run_agent(user_message: str) -> str:
-    messages = [
-        {
-            "role": "system",
-            "content": (
-                "You are a sales analysis assistant. "
-                "Use the available tools to answer questions about sales data. "
-                "Always use real data from the tools — never guess or estimate. "
-                "Be concise and clear in your answers."
-            )
-        },
-        {"role": "user", "content": user_message}
-    ]
+def run_agent(user_message: str, messages: list) -> str:
+    messages.append({"role": "user", "content": user_message})
 
     while True:
         response = client.chat.completions.create(
@@ -96,6 +85,7 @@ def run_agent(user_message: str) -> str:
         choice = response.choices[0]
 
         if choice.finish_reason == "stop":
+            messages.append({"role": "assistant", "content": choice.message.content})
             return choice.message.content
         
         if choice.finish_reason == "tool_calls":
