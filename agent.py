@@ -106,3 +106,89 @@ def run_agent(user_message: str, messages: list) -> str:
                     "tool_call_id": tool_call.id,
                     "content": json.dumps(result)
                 })
+
+
+def run_agent_structured(user_message: str, messages: list) -> dict:
+    messages.append({"role": "user", "content": user_message})
+
+    # First: let the agent call tools normally to get real data
+    while True:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=TOOLS
+        )
+
+        choice = response.choices[0]
+
+        if choice.finish_reason == "tool_calls":
+            messages.append(choice.message)
+            for tool_call in choice.message.tool_calls:
+                name = tool_call.function.name
+                args = json.loads(tool_call.function.arguments)
+                print(f"  [calling {name} with {args}]")
+                func = FUNCTION_MAP.get(name)
+                result = func(**args) if func else {"error": f"Unknown function: {name}"}
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result)
+                })
+
+        elif choice.finish_reason == "stop":
+            messages.append({
+                "role": "assistant",
+                "content": choice.message.content
+            })
+            break
+
+    # Second: ask the model to format the answer as strctured JSON
+    messages.append({
+        "role": "user",
+        "content": (
+            "Now return your answer as JSON with exactly these fields: "
+            "answer (string), data_used (list of function names called), "
+            "confidence (high/medium/low), follow_up_suggestions (list of 2 strings)."
+        )
+    })
+
+    structured_response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "sales_answer",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "answer": {
+                        "type": "string",
+                        "description": "Plain text answer to the user's question"
+                    },
+                    "data_used": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of function names called, e.g. get_top_product"
+                    },
+                    "confidence": {
+                        "type": "string",
+                        "enum": ["high", "medium", "low"]
+                    },
+                    "follow_up_suggestions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Two suggested follow-up questions"
+                    }
+                },
+                "required": ["answer", "data_used", "confidence", "follow_up_suggestions"],
+                "additionalProperties": False
+            }
+        }
+    }
+    )
+
+    result = json.loads(structured_response.choices[0].message.content)
+    result["data_used"] = [name.replace("functions.", "") for name in result["data_used"]]
+    return result

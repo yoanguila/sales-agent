@@ -12,6 +12,8 @@ data and formulates answers from actual results.
 - Chains multiple function calls when needed to enrich the answer
 - Returns structured data from real sources, never hallucinated numbers
 - Maintains conversation history across multiple turns
+- Structured JSON responses with strict JSON Schema validation
+- Multi-step reasoning: chains multiple function calls in a single turn
 - Easily extensible: add new functions and the agent picks them automatically
 
 ## Example interaction
