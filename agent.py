@@ -192,3 +192,56 @@ def run_agent_structured(user_message: str, messages: list) -> dict:
     result = json.loads(structured_response.choices[0].message.content)
     result["data_used"] = [name.replace("functions.", "") for name in result["data_used"]]
     return result
+
+def run_agent_streaming(user_message: str, messages: list) -> str:
+    messages.append({"role": "user", "content": user_message})
+
+    # Frist: resolve tool calls normally (streaming doesn't mix well with too calls)
+    while True:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            tools=TOOLS
+        )
+
+        choice = response.choices[0]
+
+        if choice.finish_reason =="tool_calls":
+            messages.append(choice.message)
+            for tool_call in choice.message.tool_calls:
+                name = tool_call.function.name
+                args = json.loads(tool_call.function.arguments)
+                print(f". [calling {name} with {args}]")
+                func = FUNCTION_MAP.get(name)
+                result = func(**args) if func else {"error": f"Unknown function: {name}"}
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": json.dumps(result)
+                })
+
+        elif choice.finish_reason == "stop":
+            messages.append({
+                "role": "assistant",
+                "content": choice.message.content
+            })
+            break
+
+    # Second: stream the final answer
+    print("\nAgent: ", end="", flush=True)
+    full_response = ""
+
+    stream = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messages,
+        stream=True
+    )
+
+    for chunk in stream:
+        delta = chunk.choices[0].delta
+        if delta.content:
+            print(delta.content, end="", flush=True)
+            full_response += delta.content
+
+    print("\n")
+    return full_response

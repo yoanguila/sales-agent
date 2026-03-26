@@ -1,6 +1,6 @@
 import json
 from dotenv import load_dotenv
-from agent import run_agent, run_agent_structured
+from agent import run_agent, run_agent_structured, run_agent_streaming
 
 load_dotenv()
 
@@ -27,6 +27,10 @@ while True:
         print("Agent thinking (structured)...")
         result = run_agent_structured(query, messages)
         print(f"\nAgent (JSON): {json.dumps(result, indent=2)}\n")
+    elif user_input.lower().startswith("stream"):
+        query = user_input[7:].strip()
+        print("Agent thinking...")
+        run_agent_streaming(query, messages)
     else:
         print("Agent thinking...")
         response = run_agent(user_input, messages)
