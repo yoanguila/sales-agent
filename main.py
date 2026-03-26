@@ -18,18 +18,6 @@ messages = [
     }
 ]
 
-# while True:
-#     user_input = input("You: ").strip()
-#     if user_input.lower() == "exit":
-#         break
-#     if not user_input:
-#         continue
-
-#     print("Agent thinking...")
-#     response = run_agent(user_input, messages)
-#     print(f"\nAgent: {response}\n")
-
-
 while True:
     user_input = input("You: ").strip()
     if user_input.lower() == "exit":
